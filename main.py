@@ -47,6 +47,7 @@ def main():
 
     video = cv2.VideoCapture(args.video)
     fps = video.get(cv2.CAP_PROP_FPS)
+    print(f"Playing video at {fps} FPS")
     frame_delay = 1.0 / fps
     ddp = DDPDevice(ip)
     matrix_w, matrix_h = get_matrix_dimensions(ip)
