@@ -31,13 +31,15 @@ def main():
     parser.add_argument("video", help="Path to video file")
     args = parser.parse_args()
 
-    vidcap = cv2.VideoCapture(args.video)
+    video = cv2.VideoCapture(args.video)
+    fps = video.get(cv2.CAP_PROP_FPS)
+    frame_delay = 1.0 / fps
     ddp = DDPDevice(args.ip)
 
     frame_count = 0
     last_frame = time.time()
     while True:
-        success, image = vidcap.read()
+        success, image = video.read()
         if not success:
             break
 
@@ -46,11 +48,9 @@ def main():
         ddp.flush(image)
         frame_count += 1
 
-        # Limit to 25fps
-        now = time.time()
-        elapsed = now - last_frame
-        if elapsed < 1 / 25:
-            time.sleep(1 / 25 - elapsed)
+        elapsed = time.time() - last_frame
+        if elapsed < frame_delay:
+            time.sleep(frame_delay - elapsed)
         last_frame = time.time()
 
 
