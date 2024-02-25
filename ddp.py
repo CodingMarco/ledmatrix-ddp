@@ -1,16 +1,13 @@
 import logging
 import struct
+import socket
 
 import numpy as np
-import voluptuous as vol
-
-from ledfx.devices import UDPDevice
-from ledfx.events import DevicesUpdatedEvent
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class DDPDevice(UDPDevice):
+class DDPDevice:
     """DDP device support"""
 
     # PORT = 4048
@@ -33,35 +30,20 @@ class DDPDevice(UDPDevice):
     SOURCE = 0x01
     TIMEOUT = 1
 
-    CONFIG_SCHEMA = vol.Schema(
-        {
-            vol.Required(
-                "pixel_count",
-                description="Number of individual pixels",
-                default=1,
-            ): vol.All(int, vol.Range(min=1)),
-            vol.Required(
-                "port",
-                description="Port for the UDP device",
-                default=4048,
-            ): vol.All(int, vol.Range(min=1, max=65535)),
-        }
-    )
-
-    def __init__(self, ledfx, config):
-        super().__init__(ledfx, config)
-        self._device_type = "DDP"
+    def __init__(self, dest, port=4048):
         self.frame_count = 0
         self.connection_warning = False
+        self._destination = dest
+        self._port = port
+        self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def flush(self, data):
         self.frame_count += 1
         try:
-
             DDPDevice.send_out(
                 self._sock,
-                self.destination,
-                self._config["port"],
+                self._destination,
+                self._port,
                 data,
                 self.frame_count,
             )
@@ -70,9 +52,6 @@ class DDPDevice(UDPDevice):
                 _LOGGER.info(f"DDP connection reestablished to {self.name}")
                 self.connection_warning = False
                 self._online = True
-                self._ledfx.events.fire_event(DevicesUpdatedEvent(self.id))
-        except AttributeError:
-            self.activate()
         except OSError as e:
             # print warning only once until it clears
 
@@ -81,7 +60,6 @@ class DDPDevice(UDPDevice):
                 _LOGGER.warning(f"Error in DDP connection to {self.name}: {e}")
                 self.connection_warning = True
                 self._online = False
-                self._ledfx.events.fire_event(DevicesUpdatedEvent(self.id))
 
     @staticmethod
     def send_out(sock, dest, port, data, frame_count):

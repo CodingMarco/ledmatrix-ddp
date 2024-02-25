@@ -1,3 +1,7 @@
+*.mp4
+*.webm
+!test.mp4
+
 # Created by https://www.toptal.com/developers/gitignore/api/python,virtualenv
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,virtualenv
 
