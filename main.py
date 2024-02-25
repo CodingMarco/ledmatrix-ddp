@@ -59,8 +59,7 @@ def main():
             break
 
         image = resize_keep_aspect_ratio(image, matrix_w, matrix_h)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) - 100.0
-        image = image.clip(0, 255)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         ddp.flush(image)
         frame_count += 1
