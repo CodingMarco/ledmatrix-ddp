@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": "wled-timo.local mb.webm"
+            "args": "wled-cm.local test.mp4"
         }
     ]
 }
